@@ -7,10 +7,16 @@ using System.Threading.Tasks;
 
 namespace AdventOfCode2023.Classes
 {
-    public static class Day1
+    public class Day1 : Day
     {
-        private static readonly string _inputPath = "C:\\Users\\adamr\\Documents\\GitHub\\Advent_Of_Code\\AdventOfCode2023\\AdventOfCode2023\\AdventOfCode2023\\Input\\Day1.txt";
-        private static readonly string _outputPath = "C:\\Users\\adamr\\Documents\\GitHub\\Advent_Of_Code\\AdventOfCode2023\\AdventOfCode2023\\AdventOfCode2023\\Output\\Day1.txt";
+        private static readonly string _inputPath = GetInputPath("Day1.txt");
+        private static readonly string _outputPath = GetOutputPath("Day1.txt");
+
+
+        public Day1()
+        {
+            CreateOutput();
+        }
 
 
         private static int CalcuateCalSum()
@@ -66,7 +72,7 @@ namespace AdventOfCode2023.Classes
         }
 
 
-        public static void CreateOutput()
+        protected override void CreateOutput()
         {
             File.WriteAllText(_outputPath, $"Part 1: {CalcuateCalSum()}");
             File.AppendAllText(_outputPath, $"\nPart 2: {CalcualteCalSumAdjusted()}");
