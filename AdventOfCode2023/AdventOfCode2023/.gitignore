@@ -1,0 +1,5 @@
+## Ignore unwanted files and folders for Advent of Code project
+
+# Input and Output folders
+Input/
+Output/
