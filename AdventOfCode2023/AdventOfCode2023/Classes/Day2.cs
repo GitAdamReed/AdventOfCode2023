@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,19 +37,17 @@ namespace AdventOfCode2023.Classes
                 game.RemoveRange(0, 2);
                 bool validGame = true;
                 int currNum = 0;
-                foreach (string word in game)
+                foreach (string s in game)
                 {
-                    if (Int32.TryParse(word, out int parseNum)) currNum = parseNum;
+                    if (Int32.TryParse(s, out int parseNum)) currNum = parseNum;
                     else
                     {
-                        string colour = word;
-                        if (!Char.IsLetter(word[^1]))
-                        {
-                            colour = word.Remove(word.Length - 1);
-                        }
+                        string colour = s;
+                        if (!Char.IsLetter(s[^1])) colour = s.Remove(s.Length - 1);
+
                         rgbSum[colour] += currNum;
 
-                        if (word[^1] == ';' || game[^1] == word)
+                        if (s[^1] == ';' || game[^1] == s)
                         {
                             if (rgbSum["red"] > red || rgbSum["green"] > green || rgbSum["blue"] > blue)
                             {
@@ -74,11 +73,64 @@ namespace AdventOfCode2023.Classes
         }
 
 
-        // TODO: Make this method ambiguous with ALL Day# classes
+        private static int GetLowestColourPower()
+        {
+            int powerSum = 0;
+            foreach (string line in File.ReadLines(_inputPath))
+            {
+                Dictionary<string, int> rgbMin = new()
+                {
+                    { "red", 0 },
+                    { "green", 0 },
+                    { "blue", 0 }
+                };
+                Dictionary<string, int> currRGBMin = new()
+                {
+                    { "red", 0 },
+                    { "green", 0 },
+                    { "blue", 0 }
+                };
+
+                var game = line.Split(" ").ToList();
+                game.RemoveRange(0, 2);
+                int currNum = 0;
+                foreach (string s in game)
+                {
+                    if (Int32.TryParse(s, out int parseNum)) currNum = parseNum;
+                    else
+                    {
+                        string colour = s;
+                        if (!Char.IsLetter(s[^1])) colour = s.Remove(s.Length - 1);
+
+                        currRGBMin[colour] += currNum;
+
+                        if (s[^1] == ';' || game[^1] == s)
+                        {
+                            foreach (var kvp in currRGBMin)
+                            {
+                                if (kvp.Value > rgbMin[kvp.Key])
+                                {
+                                    rgbMin[kvp.Key] = kvp.Value;
+                                }
+                                currRGBMin[kvp.Key] = 0;
+                            }
+                        }
+                    }
+                }
+
+                int power = 1;
+                foreach (var kvp in rgbMin) power *= kvp.Value;
+                powerSum += power;
+            }
+
+            return powerSum;
+        }
+
+
         protected override void CreateOutput()
         {
             File.WriteAllText(_outputPath, $"Part 1: {GetPossibleGameIDSum(12, 13, 14)}");
-            //File.AppendAllText(_outputPath, $"\nPart 2: {CalcualteCalSumAdjusted()}");
+            File.AppendAllText(_outputPath, $"\nPart 2: {GetLowestColourPower()}");
         }
     }
 }
