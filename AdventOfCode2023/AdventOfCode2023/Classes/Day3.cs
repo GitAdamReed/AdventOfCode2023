@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AdventOfCode2023.Classes
@@ -83,11 +86,108 @@ namespace AdventOfCode2023.Classes
 
             return sum;
         }
-        
+
+
+        private static int GetGearRatioSum()
+        {
+            int sum = 0;
+            List<char[]> charArrays = new();
+            foreach (string line in File.ReadLines(_inputPath))
+            {
+                charArrays.Add(line.ToArray());
+            }
+
+            List<KeyValuePair<int, RatioCoords>> ratioList = new();
+            int arrNum = 0;
+            foreach (var arr in charArrays)
+            {
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (Char.IsDigit(arr[i]))
+                    {
+                        string num = String.Empty;
+                        int j = i;
+                        bool isRatio = false;
+                        
+                        // Get full number
+                        try
+                        {
+                            while (Char.IsDigit(arr[j]))
+                            {
+                                num += arr[j];
+                                j++;
+                            }
+                        }
+                        catch (IndexOutOfRangeException)
+                        {
+                        }
+
+                        // Check surrounding nodes for symbols
+                        int k = arrNum - 1;
+                        while (k <= arrNum + 1 && !isRatio)
+                        {
+                            int l = i - 1;
+                            while (l <= j && !isRatio)
+                            {
+                                try
+                                {
+                                    if (charArrays[k][l] == '*')
+                                    {
+                                        isRatio = true;
+                                        ratioList.Add(KeyValuePair.Create(Int32.Parse(num), new RatioCoords(k, l)));
+                                    }
+                                }
+                                catch (IndexOutOfRangeException)
+                                {
+                                }
+                                catch (ArgumentOutOfRangeException)
+                                {
+                                }
+                                l++;
+                            }
+                            k++;
+                        }
+                        i = j;
+                    }
+                }
+                arrNum++;
+            }
+
+            List<int> matchProducts = new();
+            foreach (var kvp in ratioList)
+            {
+                var match = ratioList.FirstOrDefault(x => x.Value.CompareCoords(kvp.Value) && x.Key != kvp.Key);
+                if (match.Key != 0 && !matchProducts.Contains(kvp.Key * match.Key))
+                {
+                    matchProducts.Add(kvp.Key * match.Key);
+                }
+            }
+
+            return matchProducts.Sum();
+        }
+
+
+        private struct RatioCoords
+        {
+            public RatioCoords(int x, int y)
+            {
+                X = x;
+                Y = y;
+            }
+
+            public bool CompareCoords(RatioCoords target)
+            {
+                return X == target.X && Y == target.Y;
+            }
+
+            public int X { get; }
+            public int Y { get; }
+        }
 
         protected override void CreateOutput()
         {
             File.WriteAllText(_outputPath, $"Part 1: {GetPartNumberSum()}");
+            File.AppendAllText(_outputPath, $"\nPart 2: {GetGearRatioSum()}");
         }
     }
 }
