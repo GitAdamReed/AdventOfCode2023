@@ -90,7 +90,6 @@ namespace AdventOfCode2023.Classes
 
         private static int GetGearRatioSum()
         {
-            int sum = 0;
             List<char[]> charArrays = new();
             foreach (string line in File.ReadLines(_inputPath))
             {
