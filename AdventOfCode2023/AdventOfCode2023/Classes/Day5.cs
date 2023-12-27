@@ -99,6 +99,7 @@ namespace AdventOfCode2023.Classes
                         if (currentNum >= source && currentNum < source + range)
                         {
                             currentNum = currentNum + (dest - source);
+                            break;
                         }
                     }
                 }
@@ -106,11 +107,6 @@ namespace AdventOfCode2023.Classes
                 if (currentNum < lowestLoc) lowestLoc = currentNum;
             }
 
-            foreach (var kvp in locs)
-            {
-                Console.WriteLine($"Seed: {kvp.Key} | Location: {kvp.Value}");
-            }
-            Console.WriteLine($"Lowest location: {lowestLoc}");
             return lowestLoc;
         }
 
