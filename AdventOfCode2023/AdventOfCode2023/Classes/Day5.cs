@@ -84,7 +84,6 @@ namespace AdventOfCode2023.Classes
             }
 
             long lowestLoc = long.MaxValue;
-            Dictionary<long, long> locs = new();
             foreach (var seed in seeds)
             {
                 long currentNum = seed;
@@ -103,7 +102,6 @@ namespace AdventOfCode2023.Classes
                         }
                     }
                 }
-                locs.Add(seed, currentNum);
                 if (currentNum < lowestLoc) lowestLoc = currentNum;
             }
 
