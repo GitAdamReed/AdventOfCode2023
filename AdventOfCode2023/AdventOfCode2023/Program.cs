@@ -16,7 +16,10 @@ namespace AdventOfCode2023
             //new Day3();
             #endregion
             #region Day4
-            new Day4();
+            //new Day4();
+            #endregion
+            #region
+            new Day5();
             #endregion
         }
     }
