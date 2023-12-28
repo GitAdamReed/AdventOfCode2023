@@ -97,7 +97,7 @@ namespace AdventOfCode2023.Classes
                         
                         if (currentNum >= source && currentNum < source + range)
                         {
-                            currentNum = currentNum + (dest - source);
+                            currentNum += dest - source;
                             break;
                         }
                     }
@@ -109,10 +109,130 @@ namespace AdventOfCode2023.Classes
         }
 
 
+        private static long GetLowestLocNumSeedRange()
+        {
+            Dictionary<long, long> seeds = new();
+            List<long[]> seedToSoil = new();
+            List<long[]> soiltoFert = new();
+            List<long[]> fertToWater = new();
+            List<long[]> waterToLight = new();
+            List<long[]> lightToTemp = new();
+            List<long[]> tempToHumidity = new();
+            List<long[]> humidityToLoc = new();
+            List<long[]>[] maps = new[]
+            {
+                seedToSoil,
+                soiltoFert,
+                fertToWater,
+                waterToLight,
+                lightToTemp,
+                tempToHumidity,
+                humidityToLoc
+            };
+
+            List<string> lines = File.ReadLines(_inputPath).ToList();
+            string[] seedLine = lines[0].Split(" ");
+            lines.RemoveRange(0, 2);
+
+            for (int i = 1; i < seedLine.Length; i += 2)
+            {
+                seeds.Add(long.Parse(seedLine[i]), long.Parse(seedLine[i + 1]));
+            }
+
+            int arrNum = 0;
+            foreach (string line in lines)
+            {
+                if (line == string.Empty)
+                {
+                    arrNum++;
+                    continue;
+                }
+                if (arrNum >= maps.Length)
+                {
+                    break;
+                }
+
+                List<long> longs = new();
+                foreach (string element in line.Split(" "))
+                {
+                    if (long.TryParse(element, out long result))
+                    {
+                        longs.Add(result);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                if (longs.Count > 0)
+                {
+                    maps[arrNum].Add(longs.ToArray());
+                }
+            }
+
+            List<Task<long>> lowestLocTaskList = new();
+            int taskCount = 0;
+            foreach (var seed in seeds)
+            {
+                lowestLocTaskList.Add(GetLowestLocAsync(seed, maps));
+                Console.WriteLine($"Task {taskCount} started...");
+                taskCount++;
+            }
+            List<long> lowestLocList = new();
+            taskCount = 0;
+            foreach (var task in lowestLocTaskList)
+            {
+                long result = task.Result;
+                lowestLocList.Add(result);
+                Console.WriteLine($"Task {taskCount} completed with result: {result}");
+                taskCount++;
+            }
+            
+            return lowestLocList.Min();
+        }
+
+
+        private static async Task<long> GetLowestLocAsync(KeyValuePair<long, long> seed, List<long[]>[] maps)
+        {
+            long result = await Task.Run(() =>
+            {
+                long lowestLoc = long.MaxValue;
+                for (long i = seed.Key; i < seed.Key + seed.Value; i++)
+                {
+                    long currentNum = i;
+                    foreach (var map in maps)
+                    {
+                        foreach (var arr in map)
+                        {
+                            long dest = arr[0];
+                            long source = arr[1];
+                            long range = arr[2];
+
+                            if (currentNum >= source && currentNum < source + range)
+                            {
+                                currentNum += dest - source;
+                                break;
+                            }
+                        }
+                    }
+                    if (currentNum < lowestLoc) lowestLoc = currentNum;
+                    if (i % 10000000 == 0)
+                    {
+                        Console.WriteLine($"Thread {seed.Key} is {Math.Round((decimal)(i / (seed.Key + seed.Value) * 100))}% complete...");
+                    }
+                }
+
+                return lowestLoc;
+            });
+
+            return result;
+        }
+
+
         protected override void CreateOutput()
-        {    
+        {
             File.WriteAllText(_outputPath, $"Part 1: {GetLowestLocNum()}");
-            //File.AppendAllText(_outputPath, $"\nPart 2: {GetNumOfCards()}");
+            File.AppendAllText(_outputPath, $"\nPart 2: {GetLowestLocNumSeedRange()}");
         }
     }
 }
