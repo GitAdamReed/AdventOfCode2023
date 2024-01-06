@@ -9,8 +9,8 @@ namespace AdventOfCode2023.Classes
 {
     public class Day5 : Day
     {
-        private static readonly string _inputPath = "D:\\GitHub\\AdventOfCode2023\\AdventOfCode2023\\AdventOfCode2023\\Input\\Day5.txt";
-        private static readonly string _outputPath = "D:\\GitHub\\AdventOfCode2023\\AdventOfCode2023\\AdventOfCode2023\\Output\\Day5.txt";
+        private static readonly string _inputPath = GetInputPath("Day5.txt");
+        private static readonly string _outputPath = GetOutputPath("Day5.txt");
 
 
         public Day5()
@@ -174,7 +174,7 @@ namespace AdventOfCode2023.Classes
             int taskCount = 0;
             foreach (var seed in seeds)
             {
-                lowestLocTaskList.Add(GetLowestLocAsync(seed, maps));
+                lowestLocTaskList.Add(GetLowestLocAsync(seed, maps, taskCount));
                 Console.WriteLine($"Task {taskCount} started...");
                 taskCount++;
             }
@@ -184,7 +184,6 @@ namespace AdventOfCode2023.Classes
             {
                 long result = task.Result;
                 lowestLocList.Add(result);
-                Console.WriteLine($"Task {taskCount} completed with result: {result}");
                 taskCount++;
             }
             
@@ -192,11 +191,11 @@ namespace AdventOfCode2023.Classes
         }
 
 
-        private static async Task<long> GetLowestLocAsync(KeyValuePair<long, long> seed, List<long[]>[] maps)
+        private static async Task<long> GetLowestLocAsync(KeyValuePair<long, long> seed, List<long[]>[] maps, int taskCount)
         {
-            long result = await Task.Run(() =>
+            long lowestLoc = long.MaxValue;
+            await Task.Run(() =>
             {
-                long lowestLoc = long.MaxValue;
                 for (long i = seed.Key; i < seed.Key + seed.Value; i++)
                 {
                     long currentNum = i;
@@ -218,14 +217,15 @@ namespace AdventOfCode2023.Classes
                     if (currentNum < lowestLoc) lowestLoc = currentNum;
                     if (i % 10000000 == 0)
                     {
-                        Console.WriteLine($"Thread {seed.Key} is {Math.Round((decimal)(i / (seed.Key + seed.Value) * 100))}% complete...");
+                        double currNum = i;
+                        double totalValues = seed.Key + seed.Value;
+                        Console.WriteLine($"Task {taskCount} is {Math.Round(currNum / (totalValues) * 100, 2)}% complete...");
                     }
                 }
 
-                return lowestLoc;
-            });
+            }).ContinueWith(t => Console.WriteLine($"Task {taskCount} completed with result: {lowestLoc}"));
 
-            return result;
+            return lowestLoc;
         }
 
 
